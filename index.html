@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>副業ルート選択ノベル</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#111827">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    :root{
+      --bg:#0b1220; --card:#111827; --muted:#9ca3af; --text:#e5e7eb;
+      --btn:#1f2937; --btn2:#0ea5e9; --danger:#ef4444; --ok:#22c55e;
+      --shadow: 0 14px 35px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(14,165,233,.18), transparent 60%),
+                  radial-gradient(900px 600px at 80% 30%, rgba(34,197,94,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding: 18px 14px 80px;
+    }
+    .wrap{max-width:720px; margin:0 auto;}
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0 14px;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .brand h1{margin:0; font-size:18px; letter-spacing:.02em}
+    .brand p{margin:0; color:var(--muted); font-size:12px}
+    .pill{
+      padding:8px 10px; border:1px solid rgba(255,255,255,.08);
+      border-radius:999px; font-size:12px; color:var(--muted);
+      background: rgba(17,24,39,.55);
+      backdrop-filter: blur(8px);
+      white-space:nowrap;
+    }
+    .card{
+      background: rgba(17,24,39,.82);
+      border:1px solid rgba(255,255,255,.07);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .sceneTitle{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;
+    }
+    .sceneTitle .tag{
+      font-size:12px; color:var(--muted);
+      border:1px solid rgba(255,255,255,.08);
+      padding:6px 10px; border-radius:999px;
+    }
+    .story{
+      line-height:1.75;
+      font-size:16px;
+      margin: 0 0 14px;
+      white-space:pre-wrap;
+    }
+    .choices{display:grid; gap:10px; margin-top:10px}
+    button{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(31,41,55,.9);
+      color: var(--text);
+      padding: 12px 12px;
+      border-radius: 14px;
+      font-size: 15px;
+      text-align:left;
+      cursor:pointer;
+      transition: transform .06s ease, opacity .2s ease, border-color .2s ease;
+    }
+    button:active{transform: scale(.99)}
+    button:hover{border-color: rgba(14,165,233,.35)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .mini{
+      font-size:12px; padding:10px 12px; border-radius: 12px; opacity:.95
+    }
+    .primary{ background: rgba(14,165,233,.22); border-color: rgba(14,165,233,.45);}
+    .ok{ background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.35);}
+    .danger{ background: rgba(239,68,68,.18); border-color: rgba(239,68,68,.35);}
+    .muted{ color: var(--muted); font-size:12px; margin-top:10px; line-height:1.6}
+    .bar{
+      height:10px; background: rgba(255,255,255,.06);
+      border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.06);
+      margin: 10px 0 0;
+    }
+    .bar > div{
+      height:100%; width:0%;
+      background: rgba(14,165,233,.7);
+      transition: width .25s ease;
+    }
+    .resultGrid{display:grid; gap:10px; margin-top:10px}
+    .resultBox{
+      padding:12px; border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(31,41,55,.55);
+    }
+    .resultBox h3{margin:0 0 6px; font-size:14px}
+    .resultBox ul{margin:0; padding-left:18px; color:var(--text)}
+    a.link{
+      color:#7dd3fc; text-decoration:none; border-bottom:1px dashed rgba(125,211,252,.45)
+    }
+    footer{
+      margin-top: 14px; color: var(--muted); font-size: 11px; line-height: 1.6;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <h1>副業ルート選択ノベル</h1>
+        <p>選ぶだけで「あなた向き戦略」が出る（スマホ完結）</p>
+      </div>
+      <div class="pill" id="statusPill">進行: 0%</div>
+    </div>
+
+    <div class="card">
+      <div class="sceneTitle">
+        <div class="tag" id="sceneTag">START</div>
+        <div class="tag" id="stepTag">Step 1</div>
+      </div>
+
+      <p class="story" id="storyText"></p>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="bar"><div id="barFill"></div></div>
+
+      <div class="row">
+        <button class="mini danger" id="restartBtn">最初から</button>
+        <button class="mini" id="backBtn">ひとつ戻る</button>
+        <button class="mini primary" id="shareBtn">結果をシェア</button>
+        <button class="mini ok" id="copyBtn">結果をコピー</button>
+      </div>
+
+      <p class="muted" id="hint">
+        コツ：診断をXに貼ると反応が取りやすい。「結果→次の一手→noteリンク」の順が強い。
+      </p>
+
+      <div id="resultArea" class="resultGrid" style="display:none;"></div>
+    </div>
+
+    <footer>
+      オフライン対応：電波悪くても動くPWA。<br>
+      これをそのままGitHub Pagesに置けばOK。
+    </footer>
+  </div>
+
+<script>
+  // ====== STORY DATA（ここを増やすとボリュームUP） ======
+  const NOTE_URL = "https://note.com/yusuke_record/n/n167ac120cec6"; // いつもの導線
+  const STORY = {
+    start: {
+      tag: "START",
+      text:
+`あなたは「月+5万円」を狙う普通のパパ。
+
+今日、分岐する。
+この選択で“向いてる副業ルート”が出る。
+
+まずは…あなたのタイプは？`,
+      choices: [
+        { label: "コツコツ型（毎日少しなら続く）", next: "steady" },
+        { label: "短期集中型（期限があると燃える）", next: "sprint" },
+        { label: "迷いがち（決める仕組みが欲しい）", next: "indecisive" }
+      ]
+    },
+
+    steady: {
+      tag:"TYPE",
+      text:
+`コツコツ型、強い。
+「積み上げ」に向いてる。
+
+次。あなたが一番ストレス感じるのは？`,
+      choices:[
+        { label:"売れなかった時の不安", next:"risk_low" },
+        { label:"作業が増えるのが嫌", next:"time_low" },
+        { label:"人とのやり取りが面倒", next:"people_low" }
+      ]
+    },
+
+    sprint: {
+      tag:"TYPE",
+      text:
+`短期集中型、爆発力ある。
+「短期で成果が見える」ルートが合う。
+
+次。初期費用はどうする？`,
+      choices:[
+        { label:"なるべく0円で始めたい", next:"budget_zero" },
+        { label:"1〜3万円なら出せる", next:"budget_mid" },
+        { label:"投資として5万円までOK", next:"budget_high" }
+      ]
+    },
+
+    indecisive: {
+      tag:"TYPE",
+      text:
+`迷いがち＝才能。
+“選択肢を減らす仕組み”があれば伸びる。
+
+次。あなたが今いちばん欲しいのは？`,
+      choices:[
+        { label:"毎日の行動が決まること", next:"need_system" },
+        { label:"すぐ使えるテンプレ", next:"need_template" },
+        { label:"失敗しない道筋", next:"need_map" }
+      ]
+    },
+
+    // --- steady branches ---
+    risk_low: {
+      tag:"CHECK",
+      text:
+`不安がストレスなら、在庫や価格変動が少ない方がいい。
+
+あなたは文章を書くのは好き？`,
+      choices:[
+        { label:"わりと好き（書ける）", next:"result_note" },
+        { label:"苦手（できれば避けたい）", next:"result_routine" }
+      ]
+    },
+    time_low: {
+      tag:"CHECK",
+      text:
+`作業が増えるのが嫌なら「仕組み化」一択。
+
+スマホだけで完結したい？`,
+      choices:[
+        { label:"スマホだけがいい", next:"result_microapp" },
+        { label:"PCも使える（少しなら）", next:"result_automation" }
+      ]
+    },
+    people_low: {
+      tag:"CHECK",
+      text:
+`人とのやり取りが面倒なら「匿名・非対面」が勝ち。
+
+あなたは“作る”のが好き？`,
+      choices:[
+        { label:"好き（作って改善したい）", next:"result_microapp" },
+        { label:"好きじゃない（シンプルがいい）", next:"result_note" }
+      ]
+    },
+
+    // --- sprint branches ---
+    budget_zero: {
+      tag:"BUDGET",
+      text:
+`0円なら「コンテンツ→導線→販売」が最速。
+
+顔出しは？`,
+      choices:[
+        { label:"なしでOK", next:"result_note" },
+        { label:"どっちでも", next:"result_note" }
+      ]
+    },
+    budget_mid: {
+      tag:"BUDGET",
+      text:
+`1〜3万使えるなら、回転の速い“薄利多売”もあり。
+
+物販に抵抗ある？`,
+      choices:[
+        { label:"ある（避けたい）", next:"result_microapp" },
+        { label:"ない（やってみたい）", next:"result_resell" }
+      ]
+    },
+    budget_high: {
+      tag:"BUDGET",
+      text:
+`5万までOKなら、仕入れの幅が広がる。
+
+ただし大事なのは“損切りルール”。
+ルール守れる？`,
+      choices:[
+        { label:"守れる（淡々とやる）", next:"result_resell" },
+        { label:"自信ない（感情で動く）", next:"result_system" }
+      ]
+    },
+
+    // --- indecisive branches ---
+    need_system: {
+      tag:"NEED",
+      text:
+`仕組みが欲しいなら、まずは「決める装置」から。
+
+あなたが止まりやすいのは？`,
+      choices:[
+        { label:"何をするか決められない", next:"result_slot" },
+        { label:"やる気が続かない", next:"result_habit" }
+      ]
+    },
+    need_template: {
+      tag:"NEED",
+      text:
+`テンプレが欲しいなら「出力→貼る」だけにする。
+
+X投稿の頻度は？`,
+      choices:[
+        { label:"毎日（朝昼晩）", next:"result_xgen" },
+        { label:"週3くらい", next:"result_note" }
+      ]
+    },
+    need_map: {
+      tag:"NEED",
+      text:
+`道筋が欲しいなら、迷いを減らす“一本道”が正義。
+
+あなたは「継続」より「一発」？`,
+      choices:[
+        { label:"継続で勝ちたい", next:"result_routine" },
+        { label:"一発で伸ばしたい", next:"result_microapp" }
+      ]
+    },
+
+    // ====== RESULTS ======
+    result_note: {
+      tag:"RESULT",
+      result: {
+        title: "ルートA：コンテンツ副業（note×X）",
+        summary: "あなたは“在庫なし・低リスク”が向いてる。実体験＋気づきを積み上げるタイプ。",
+        nextActions: [
+          "noteのテーマを1つに固定（投資×家庭×副業）",
+          "毎日Xで短文→週1でnoteにまとめる",
+          "無料→有料の導線を1本だけ作る"
+        ],
+        hook: "今日の一言：『稼ぐ前に、発信の型を作れ。型が勝つ。』"
+      }
+    },
+    result_microapp: {
+      tag:"RESULT",
+      result: {
+        title: "ルートB：マイクロPWA量産（無料→信頼→販売）",
+        summary: "あなたは“作って改善”が武器。小さい便利ツールを量産して信用を積むタイプ。",
+        nextActions: [
+          "1日1アプリ（小さく）→GitHub Pagesで公開",
+          "Xで『使えるURL』として投稿",
+          "月末に『まとめnote（有料）』に回収"
+        ],
+        hook: "今日の一言：『完成度より公開速度。公開が最強の学習。』"
+      }
+    },
+    result_resell: {
+      tag:"RESULT",
+      result: {
+        title: "ルートC：回転型せどり（小さく検証→拡大）",
+        summary: "あなたは“手を動かした分だけ結果が出る”ルートが合う。数字で判断できるタイプ。",
+        nextActions: [
+          "仕入れルールを固定（利益率/回転日数/上限）",
+          "週2回だけ仕入れ→週2回だけ出品（作業日を決める）",
+          "利益の半分は投資に自動移動"
+        ],
+        hook: "今日の一言：『仕入れの時点で勝負は決まってる。』"
+      }
+    },
+    result_automation: {
+      tag:"RESULT",
+      result: {
+        title: "ルートD：自動化×発信（仕組みで勝つ）",
+        summary: "あなたは“作業を減らす設計”が向いてる。面倒を嫌うのは才能。",
+        nextActions: [
+          "投稿テンプレを3つ作って固定",
+          "毎晩10分で翌日の投稿をまとめて作る",
+          "1週間で改善点だけ触る（毎日いじらない）"
+        ],
+        hook: "今日の一言：『頑張るな、仕組みにやらせろ。』"
+      }
+    },
+    result_routine: {
+      tag:"RESULT",
+      result: {
+        title: "ルートE：ルーティン副業（継続で勝つ）",
+        summary: "あなたは“少しずつ伸びる”ルートが最強。メンタル安定が武器。",
+        nextActions: [
+          "毎日やることを1つだけにする",
+          "結果は週1で振り返る（毎日見ない）",
+          "辞めない仕組み＝カレンダーに固定する"
+        ],
+        hook: "今日の一言：『勝つ人は、続けた人。』"
+      }
+    },
+    result_system: {
+      tag:"RESULT",
+      result: {
+        title: "ルートF：ルール先に作る（感情対策）",
+        summary: "あなたは勢いが出るほど危ない。だから先に“ルール”が必要。",
+        nextActions: [
+          "買う条件/買わない条件を紙に書く",
+          "上限金額を決める（絶対に超えない）",
+          "週1だけ数字を見る（毎日は見ない）"
+        ],
+        hook: "今日の一言：『ルールがない＝運ゲーになる。』"
+      }
+    },
+    result_slot: {
+      tag:"RESULT",
+      result: {
+        title: "ルートG：決める装置（迷い撃退）",
+        summary: "あなたは“選択肢が多い”ほど止まる。だから決める仕組みが必要。",
+        nextActions: [
+          "タスク候補を5つまでに絞る",
+          "スロットで1つに決める（悩まない）",
+          "終わったら丸を付けるだけ"
+        ],
+        hook: "今日の一言：『悩む時間＝副業の敵。』"
+      }
+    },
+    result_habit: {
+      tag:"RESULT",
+      result: {
+        title: "ルートH：習慣化（続かないを倒す）",
+        summary: "あなたは“気合い”じゃなく“環境”で勝つタイプ。",
+        nextActions: [
+          "やる場所/時間を固定する",
+          "1回の量を小さくする（5分でもOK）",
+          "連続日数を見える化する"
+        ],
+        hook: "今日の一言：『やる気じゃない、仕組み。』"
+      }
+    },
+    result_xgen: {
+      tag:"RESULT",
+      result: {
+        title: "ルートI：X投稿ジェネ×note導線（最短）",
+        summary: "あなたは“出力して貼るだけ”が合う。投稿が止まらなくなる。",
+        nextActions: [
+          "朝昼晩の型を固定（体験→学び→行動）",
+          "毎回noteリンクを最後に付ける",
+          "反応が良い投稿だけnoteで深掘り"
+        ],
+        hook: "今日の一言：『投稿は資産。溜めるほど強くなる。』"
+      }
+    },
+  };
+
+  // ====== STATE ======
+  const STORAGE_KEY = "route_novel_state_v1";
+  const state = loadState() || { current: "start", history: [], done: false, lastResultText: "" };
+
+  const storyText = document.getElementById("storyText");
+  const choicesEl = document.getElementById("choices");
+  const resultArea = document.getElementById("resultArea");
+  const sceneTag = document.getElementById("sceneTag");
+  const stepTag = document.getElementById("stepTag");
+  const statusPill = document.getElementById("statusPill");
+  const barFill = document.getElementById("barFill");
+
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    if (!confirm("最初からやり直す？")) return;
+    state.current = "start";
+    state.history = [];
+    state.done = false;
+    state.lastResultText = "";
+    saveState();
+    render();
+  });
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    if (state.history.length === 0) return;
+    state.current = state.history.pop();
+    state.done = false;
+    saveState();
+    render();
+  });
+
+  document.getElementById("shareBtn").addEventListener("click", async () => {
+    const text = makeShareText();
+    const url = location.href;
+    try{
+      if (navigator.share) {
+        await navigator.share({ title: "副業ルート診断", text, url });
+      } else {
+        await navigator.clipboard.writeText(text + "\n" + url);
+        alert("シェア文をコピーしたよ（貼り付けて使って）");
+      }
+    }catch(e){}
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const text = makeShareText() + "\n" + location.href;
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("結果をコピーしたよ！");
+    }catch(e){
+      alert("コピーできなかった…（ブラウザ設定の影響かも）");
+    }
+  });
+
+  function render(){
+    const node = STORY[state.current];
+    if (!node) return;
+
+    sceneTag.textContent = node.tag || "SCENE";
+    stepTag.textContent = `Step ${state.history.length + 1}`;
+
+    const progress = calcProgress();
+    statusPill.textContent = `進行: ${progress}%`;
+    barFill.style.width = `${progress}%`;
+
+    // clear
+    choicesEl.innerHTML = "";
+    resultArea.style.display = "none";
+    resultArea.innerHTML = "";
+
+    if (node.result){
+      state.done = true;
+      const r = node.result;
+
+      storyText.textContent =
+`${r.title}
+
+${r.summary}
+
+👇 次の一手（この順でOK）`;
+      // show result boxes
+      resultArea.style.display = "grid";
+      resultArea.appendChild(makeBox("次の一手", listToHtml(r.nextActions)));
+      resultArea.appendChild(makeBox("一言", `<div style="line-height:1.7">${escapeHtml(r.hook)}</div>`));
+      resultArea.appendChild(makeBox("導線", `<div style="line-height:1.7">
+        noteはこちら → <a class="link" href="${NOTE_URL}" target="_blank" rel="noopener">${escapeHtml(NOTE_URL)}</a>
+      </div>`));
+
+      state.lastResultText = makeShareText();
+      saveState();
+      return;
+    }
+
+    storyText.textContent = node.text || "";
+
+    (node.choices || []).forEach(ch => {
+      const b = document.createElement("button");
+      b.textContent = ch.label;
+      b.addEventListener("click", () => {
+        state.history.push(state.current);
+        state.current = ch.next;
+        saveState();
+        render();
+      });
+      choicesEl.appendChild(b);
+    });
+
+    saveState();
+  }
+
+  function makeBox(title, inner){
+    const div = document.createElement("div");
+    div.className = "resultBox";
+    div.innerHTML = `<h3>${escapeHtml(title)}</h3>${inner}`;
+    return div;
+  }
+
+  function listToHtml(arr){
+    const items = arr.map(s => `<li>${escapeHtml(s)}</li>`).join("");
+    return `<ul>${items}</ul>`;
+  }
+
+  function calcProgress(){
+    // 超ざっくり：3〜4手で結果に到達する想定
+    const steps = Math.min(4, state.history.length + 1);
+    const p = Math.round((steps / 4) * 100);
+    return Math.max(5, Math.min(100, p));
+  }
+
+  function makeShareText(){
+    if (!state.done){
+      return "副業ルート診断やってる。あなたはどれ？";
+    }
+    // result node
+    const node = STORY[state.current];
+    const title = node?.result?.title || "診断結果";
+    const hook = node?.result?.hook || "";
+    return `【副業ルート診断】\n${title}\n${hook}\n#副業 #投資 #note`;
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){
+      return null;
+    }
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
+  }
+
+  // Register SW
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  }
+
+  render();
+</script>
+</body>
+</html>
